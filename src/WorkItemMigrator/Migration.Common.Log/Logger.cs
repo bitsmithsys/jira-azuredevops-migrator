@@ -119,6 +119,10 @@ namespace Migration.Common.Log
                 _warnings.Add(message);
                 LogTrace(message, level);
             }
+            else if (level == LogLevel.Debug)
+            {
+                LogTrace(message, level);
+            }
         }
         public static void Log(Exception ex, string message, LogLevel logLevel = LogLevel.Error)
         {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
+using System.Web.ModelBinding;
 using Common.Config;
 
 using Migration.Common;
@@ -91,7 +92,7 @@ namespace JiraExport
 
                     if (string.IsNullOrEmpty(linkType))
                     {
-                        Logger.Log(LogLevel.Warning, $"Cannot add 'Child' {linkedItemKey} link to 'Parent' {r.ParentItem.Key}, 'Child' link-map configuration missing.");
+                        Logger.Log(LogLevel.Warning, $"Cannot add child {linkedItemKey} link to parent {r.ParentItem.Key}, child link-map of [{type}] configuration missing.");
                         return;
                     }
 
@@ -224,13 +225,37 @@ namespace JiraExport
         {
             if (r.Fields.TryGetValue(field, out object value))
             {
-                var parentKeyStr = r.OriginId.Substring(r.OriginId.LastIndexOf("-", StringComparison.InvariantCultureIgnoreCase) + 1);
-                var childKeyStr = value?.ToString().Substring(r.OriginId.LastIndexOf("-", StringComparison.InvariantCultureIgnoreCase) + 1);
-
-                if (int.TryParse(parentKeyStr, out var parentKey) && int.TryParse(childKeyStr, out var childKey))
+                try
                 {
-                    if (parentKey > childKey)
-                        AddSingleLink(r, links, field, type);
+                    if (value == null)
+                    {
+                        return;
+                    }
+                    var parentDashIndex = r.OriginId.LastIndexOf("-", StringComparison.InvariantCultureIgnoreCase);
+                    var parentKeyStr = r.OriginId.Substring(parentDashIndex + 1);
+                    var parentPrefix = r.OriginId.Substring(0, parentDashIndex);
+
+                    // Note that original code assumed that the prefix was the same for the value and revision origin ID.
+                    var valueStr = value.ToString();
+                    var childDashIndex = valueStr.LastIndexOf("-", StringComparison.InvariantCultureIgnoreCase);
+                    var childKeyStr = valueStr.Substring(childDashIndex + 1);
+                    var childPrefix = valueStr.Substring(0, childDashIndex);
+
+                    if (!parentPrefix.Equals(childPrefix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Logger.Log(LogLevel.Warning, $"MapEpicChildLink() is skipping probable external reference between [{r.OriginId}] and [{valueStr}].");
+                        return;
+                    }
+
+                    if (int.TryParse(parentKeyStr, out var parentKey) && int.TryParse(childKeyStr, out var childKey))
+                    {
+                        if (parentKey > childKey)
+                            AddSingleLink(r, links, field, type);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw;
                 }
             }
         }
@@ -280,14 +305,30 @@ namespace JiraExport
 
                             if (include)
                             {
-                                Logger.Log(LogLevel.Debug, $"Mapped value '{value}' to field '{fieldreference}'.");
+                                StringBuilder valueDisplay = new StringBuilder(value?.ToString());
+                                valueDisplay.Replace('\r', '.');
+                                valueDisplay.Replace('\n', '.');
+
+                                const int maxLen = 60;
+                                if (valueDisplay.Length > maxLen)
+                                {
+                                    valueDisplay.Length = maxLen - 3;
+                                    valueDisplay.Append("...");
+                                }
+
+                                Logger.Log(LogLevel.Debug, $"Mapped field [{fieldreference}] with value [{valueDisplay}].");
                                 fields.Add(new WiField()
                                 {
                                     ReferenceName = fieldreference,
                                     Value = value
                                 });
                             }
+                            else
+                            {
+                                // Logger.Log(LogLevel.Debug, $"Not mapping [{field.Key}].");
+                            }
                         }
+
                         catch (Exception ex)
                         {
                             Logger.Log(ex, $"Error mapping field '{field.Key}' on item '{r.OriginId}'.");

@@ -217,6 +217,7 @@ namespace JiraExport
 
                         if (issue == null)
                             continue;
+                        Logger.Log(LogLevel.Info, $"Key [{issue.Key}] of type [{issue.Type}] has {issue.Revisions.Count} revisions.");
 
                         yield return issue;
                         index++;
