@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-
+using System.Reflection;
 using Common.Config;
 
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.TeamFoundation.Framework.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 
 using Migration.Common;
@@ -125,6 +126,25 @@ namespace WorkItemImport
                             wi = agent.CreateWI(executionItem.WiType);
 
                         Logger.Log(LogLevel.Info, $"Processing {importedItems + 1}/{revisionCount} - wi '{(wi.Id > 0 ? wi.Id.ToString() : "Initial revision")}', jira '{executionItem.OriginId}, rev {executionItem.Revision.Index}'.");
+
+
+
+                        var breakItems = new (string, int)[]
+                        {
+                            ("QUANTUMTOUCH-4", 23),
+                            ("QUANTUMTOUCH-5", 3),
+                            ("QUANTUMTOUCH-7", 3),
+                        };
+
+                        foreach (var item in breakItems)
+                        {
+                            if (item.Item1.Equals(executionItem.OriginId, StringComparison.OrdinalIgnoreCase) &&
+                                item.Item2 == executionItem.Revision.Index)
+                            {
+                                Debugger.Break();
+                                break;
+                            }
+                        }
 
                         agent.ImportRevision(executionItem.Revision, wi);
                         importedItems++;

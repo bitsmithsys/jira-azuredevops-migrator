@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -474,7 +475,20 @@ namespace WorkItemImport
                 field.Value = fieldValue;
 
                 if (field.IsValid)
-                    Logger.Log(LogLevel.Debug, $"Mapped '{fieldRef}' '{fieldValue}'.");
+                {
+                    StringBuilder valueDisplay = new StringBuilder(fieldValue?.ToString());
+                    valueDisplay.Replace('\r', '.');
+                    valueDisplay.Replace('\n', '.');
+
+                    const int maxLen = 70;
+                    if (valueDisplay.Length > maxLen)
+                    {
+                        valueDisplay.Length = maxLen - 3;
+                        valueDisplay.Append("...");
+                    }
+
+                    Logger.Log(LogLevel.Debug, $"Mapped field [{fieldRef}] with value [{valueDisplay}].");
+                }
                 else
                 {
                     field.Value = null;
@@ -598,6 +612,32 @@ namespace WorkItemImport
 
         private bool AddLink(WiLink link, WorkItem wi)
         {
+            var comment = string.Empty;
+            if (link.WiType.Equals("System.LinkTypes.Hierarchy-Forward", StringComparison.OrdinalIgnoreCase))
+            {
+                // Need to verify there aren't already other parents
+                var relatedWorkItem = GetWorkItem(link.TargetWiId);
+//                var relatedLinkCount = relatedWorkItem.RelatedLinkCount;
+                foreach (var item in relatedWorkItem.WorkItemLinks)
+                {
+                    var relatedLink = item as WorkItemLink;
+                    if (relatedLink == null)
+                    {
+                        Logger.Log(LogLevel.Warning, $"Don't know how to handle link of type {item.GetType()}");
+                        continue;
+                    }
+
+                    if (relatedLink.LinkTypeEnd.ImmutableName.Equals("System.LinkTypes.Hierarchy-Reverse",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        // There's already another parent for this one, change this to related with a comment
+                        link.WiType = "System.LinkTypes.Related";
+                        comment = $"Link changed from parent/child as {relatedLink.SourceId} already had parent.";
+                        Logger.Log(LogLevel.Debug, comment);
+                    }
+                }
+            }
+
             var linkEnd = ParseLinkEnd(link, wi);
 
             if (linkEnd != null)
@@ -606,6 +646,7 @@ namespace WorkItemImport
                 {
                     var relatedLink = new RelatedLink(linkEnd, link.TargetWiId);
                     relatedLink = ResolveCiclycalLinks(relatedLink, wi);
+                    relatedLink.Comment = comment;
                     if (!IsDuplicateWorkItemLink(wi.Links, relatedLink))
                     {
                         wi.Links.Add(relatedLink);
@@ -712,6 +753,7 @@ namespace WorkItemImport
             }
             try
             {
+                FixupMultipleParentLinks(newWorkItem);
                 newWorkItem.Save(SaveFlags.MergeAll);
             }
             catch (FileAttachmentException faex)
@@ -746,6 +788,36 @@ namespace WorkItemImport
             }
 
             return result;
+        }
+        private void FixupMultipleParentLinks(WorkItem newWorkItem)
+        {
+            //var links = newWorkItem.Links.OfType<RelatedLink>().ToList();
+            //int parents = 0;
+            //foreach (var link in links)
+            //{
+            //    if (link.LinkTypeEnd.Name.Equals("Parent", StringComparison.OrdinalIgnoreCase))
+            //    {
+            //        var thisWorkItem = GetWorkItem(newWorkItem.Id);
+            //        if (thisWorkItem != null)
+            //        {
+            //            foreach (RelatedLink existingLink in thisWorkItem.Links)
+            //            {
+            //                if (existingLink.LinkTypeEnd.ImmutableName.Equals("System.LinkTypes.Hierarchy-Reverse",
+            //                    StringComparison.CurrentCultureIgnoreCase))
+            //                {
+            //                    parents++;
+            //                }
+            //            }
+            //        }
+
+            //        if (parents > 0)
+            //        {
+            //            // TFS only allows a single parent, change the rest to related
+            //            Logger.Log(LogLevel.Warning, $"Work Item [{newWorkItem.Id}] had more than 1 parents, [{link.LinkTypeEnd.OppositeEnd.Id}] changed to related.");
+            //        }
+            //        parents++;
+            //    }
+            //}
         }
 
         private void EnsureAuthorFields(WiRevision rev)

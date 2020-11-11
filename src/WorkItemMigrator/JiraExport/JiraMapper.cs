@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Web.ModelBinding;
 using Common.Config;
@@ -296,6 +297,15 @@ namespace JiraExport
 
                 if (type != null && _fieldMappingsPerType.TryGetValue(type, out var mapping))
                 {
+                    // Special case, add team with initial revision
+                    if (r.Index == 0)
+                    {
+                        fields.Add(new WiField()
+                        {
+                            ReferenceName = "MTS.Team",
+                            Value = "TestSuite"
+                        });
+                    }
                     foreach (var field in mapping)
                     {
                         try

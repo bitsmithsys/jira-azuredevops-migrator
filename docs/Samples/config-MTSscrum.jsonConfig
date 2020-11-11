@@ -1,0 +1,480 @@
+{
+  "source-project": "QUANTUMTOUCH",
+  "target-project": "MTS",
+  "query": "project=QUANTUMTOUCH ORDER BY Rank ASC",
+  "using-jira-cloud": true,
+  "workspace": "C:\\_MTS\\JiraExport\\",
+  "epic-link-field": "Epic Link",
+  "sprint-field": "Sprint",
+  "download-options": 7,
+  "batch-size": 20,
+  "log-level": "Debug",
+  "attachment-folder": "Attachments",
+  "user-mapping-file": "users.txt",
+  "base-area-path": "MTS/TestSuite/QuantumTouch2",
+  "base-iteration-path": "MTS/TestSuite/QuantumTouch2",
+  "ignore-failed-links": true,
+  "process-template": "MTS Custom Scrum",
+  "link-map": {
+    "link": [
+      {
+        "source": "Epic",
+        "target": "System.LinkTypes.Hierarchy-Forward"
+      },
+      {
+        "source": "Parent",
+        "target": "System.LinkTypes.Hierarchy-Forward"
+      },
+      {
+        "source": "Child",
+        "target": "System.LinkTypes.Hierarchy-Reverse"
+      },
+      {
+        "source": "Relates",
+        "target": "System.LinkTypes.Related"
+      },
+      {
+        "source": "Duplicate",
+        "target": "System.LinkTypes.Duplicate-Forward"
+      }
+    ]
+  },
+  "type-map": {
+    "type": [
+      {
+        "source": "Feature",
+        "target": "Feature"
+      },
+      {
+        "source": "Epic",
+        "target": "Epic"
+      },
+      {
+        "source": "Improvement",
+        "target": "Product Backlog Item"
+      },
+      {
+        "source": "Spike",
+        "target": "Product Backlog Item"
+      },
+      {
+        "source": "Story",
+        "target": "Product Backlog Item"
+      },
+      {
+        "source": "Bug",
+        "target": "Bug"
+      },
+      {
+        "source": "Task",
+        "target": "Task"
+      },
+      {
+        "source": "Ticket",
+        "target": "Product Backlog Item"
+      },
+      {
+        "source": "Sub-task",
+        "target": "Task"
+      },
+      {
+        "source": "Test",
+        "target": "Test"
+      }
+    ]
+  },
+  "field-map": {
+    "field": [
+      {
+        "source": "summary",
+        "target": "System.Title",
+        "mapper": "MapTitle"
+      },
+      {
+        "source": "reporter",
+        "target": "System.CreatedBy",
+        "mapper": "MapUser"
+      },
+      {
+        "source": "assignee",
+        "target": "System.AssignedTo",
+        "mapper": "MapUser"
+      },
+      {
+        "source": "description",
+        "target": "System.Description",
+        "mapper": "MapRendered"
+      },
+      {
+        "source": "priority",
+        "target": "MTS.Priority",
+        "for": "Bug,Product Backlog Item",
+        "mapping": {
+          "values": [
+            {
+              "source": "Blocker",
+              "target": "Critical"
+            },
+            {
+              "source": "Critical",
+              "target": "Critical"
+            },
+            {
+              "source": "Highest",
+              "target": "Critical"
+            },
+            {
+              "source": "Major",
+              "target": "Critical"
+            },
+            {
+              "source": "High",
+              "target": "Critical"
+            },
+            {
+              "source": "Medium",
+              "target": "Important"
+            },
+            {
+              "source": "Low",
+              "target": "Nice to Have"
+            },
+            {
+              "source": "Lowest",
+              "target": "Nice to Have"
+            },
+            {
+              "source": "Minor",
+              "target": "Nice to Have"
+            },
+            {
+              "source": "Trivial",
+              "target": "Nice to Have"
+            },
+            {
+              "source": "Deferred",
+              "target": "Nice to Have"
+            },
+            {
+              "source": "Undetermined",
+              "target": "Nice to Have"
+            }
+          ]
+        }
+      },
+      {
+        "source": "priority",
+        "target": "Microsoft.VSTS.Common.Priority",
+        "for": "Epic,Feature",
+        "mapping": {
+          "values": [
+            {
+              "source": "Blocker",
+              "target": "1"
+            },
+            {
+              "source": "Critical",
+              "target": "1"
+            },
+            {
+              "source": "Highest",
+              "target": "1"
+            },
+            {
+              "source": "Major",
+              "target": "2"
+            },
+            {
+              "source": "High",
+              "target": "2"
+            },
+            {
+              "source": "Medium",
+              "target": "3"
+            },
+            {
+              "source": "Low",
+              "target": "3"
+            },
+            {
+              "source": "Lowest",
+              "target": "4"
+            },
+            {
+              "source": "Minor",
+              "target": "4"
+            },
+            {
+              "source": "Trivial",
+              "target": "4"
+            },
+            {
+              "source": "Deferred",
+              "target": "4"
+            },
+            {
+              "source": "Undetermined",
+              "target": "4"
+            }
+          ]
+        }
+      },
+      {
+        "source": "Sprint",
+        "source-type": "name",
+        "target": "System.IterationPath",
+        "mapper": "MapSprint"
+      },
+      {
+        "source": "labels",
+        "target": "System.Tags",
+        "mapper": "MapTags"
+      },
+      {
+        "source": "comment",
+        "target": "System.History",
+        "mapper": "MapRendered"
+      },
+      {
+        "source": "status",
+        "target": "System.State",
+        "for": "Task",
+        "mapping": {
+          "values": [
+            {
+              "source": "To Do",
+              "target": "To Do"
+            },
+            {
+              "source": "Done",
+              "target": "Done"
+            },
+            {
+              "source": "Ready",
+              "target": "Done"
+            },
+            {
+              "source": "In QA",
+              "target": "In Progress"
+            },
+            {
+              "source": "In Progress",
+              "target": "In Progress"
+            }
+          ]
+        }
+      },
+      {
+        "source": "status",
+        "target": "System.State",
+        "for": "Bug,Product Backlog Item",
+        "mapping": {
+          "values": [
+            {
+              "source": "Info Needed",
+              "target": "New"
+            },
+            {
+              "source": "To Be Estimated",
+              "target": "New"
+            },
+            {
+              "source": "Draft",
+              "target": "New"
+            },
+            {
+              "source": "Ready for Ticketing",
+              "target": "New"
+            },
+            {
+              "source": "Unconfirmed",
+              "target": "New"
+            },
+            {
+              "source": "Ticketed",
+              "target": "New"
+            },
+            {
+              "source": "To Do",
+              "target": "New"
+            },
+            {
+              "source": "Confirmed",
+              "target": "New"
+            },
+            {
+              "source": "Open",
+              "target": "New"
+            },
+            {
+              "source": "Deferred",
+              "target": "New"
+            },
+            {
+              "source": "Estimated, Waiting Approval",
+              "target": "New"
+            },
+            {
+              "source": "Ready",
+              "target": "Approved"
+            },
+            {
+              "source": "Ready",
+              "target": "Approved"
+            },
+            {
+              "source": "Assigned",
+              "target": "Approved"
+            },
+            {
+              "source": "Approved",
+              "target": "Approved"
+            },
+            {
+              "source": "Done",
+              "target": "Done"
+            },
+            {
+              "source": "Closed",
+              "target": "Done"
+            },
+            {
+              "source": "In Progress",
+              "target": "In Progress"
+            },
+            {
+              "source": "Blocked",
+              "target": "In Progress"
+            },
+            {
+              "source": "Fixed Locally",
+              "target": "In Progress"
+            },
+            {
+              "source": "Development Complete",
+              "target": "Ready for Test"
+            },
+            {
+              "source": "In Client QA",
+              "target": "Ready for Test"
+            },
+            {
+              "source": "In QA",
+              "target": "Ready for Test"
+            },
+            {
+              "source": "Pending Close",
+              "target": "Ready for Test"
+            },
+            {
+              "source": "Ready For Client QA",
+              "target": "Ready for Test"
+            }
+          ]
+        }
+      },
+      {
+        "source": "status",
+        "target": "System.State",
+        "for": "Epic,Feature",
+        "mapping": {
+          "values": [
+            {
+              "source": "To Do",
+              "target": "New"
+            },
+            {
+              "source": "Deferred",
+              "target": "New"
+            },
+            {
+              "source": "Draft",
+              "target": "New"
+            },
+            {
+              "source": "Estimated, Waiting Approval",
+              "target": "New"
+            },
+            {
+              "source": "Approved",
+              "target": "New"
+            },
+            {
+              "source": "Info Needed",
+              "target": "New"
+            },
+            {
+              "source": "Confirmed",
+              "target": "New"
+            },
+            {
+              "source": "To Be Estimated",
+              "target": "New"
+            },
+            {
+              "source": "Done",
+              "target": "Done"
+            },
+            {
+              "source": "Closed",
+              "target": "Done"
+            },
+            {
+              "source": "Complete",
+              "target": "Done"
+            },
+            {
+              "source": "Development Complete",
+              "target": "Done"
+            },
+            {
+              "source": "Open",
+              "target": "In Progress"
+            },
+            {
+              "source": "Blocked",
+              "target": "In Progress"
+            },
+            {
+              "source": "In QA",
+              "target": "In Progress"
+            },
+            {
+              "source": "In Client QA",
+              "target": "In Progress"
+            },
+            {
+              "source": "Ready For Client QA",
+              "target": "In Progress"
+            },
+            {
+              "source": "Assigned",
+              "target": "In Progress"
+            },
+            {
+              "source": "In Progress",
+              "target": "In Progress"
+            }
+          ]
+        }
+      },
+      {
+        "source": "Story Points",
+        "source-type": "name",
+        "target": "Microsoft.VSTS.Scheduling.Effort",
+        "not-for": "Task"
+      },
+      {
+        "source": "timeestimate",
+        "target": "Microsoft.VSTS.Scheduling.RemainingWork",
+        "mapper": "MapRemainingWork",
+        "for": "Bug,Task"
+      },
+      {
+        "source": "description",
+        "target": "Microsoft.VSTS.TCM.ReproSteps",
+        "for": "Bug"
+      }
+    ]
+  }
+}
