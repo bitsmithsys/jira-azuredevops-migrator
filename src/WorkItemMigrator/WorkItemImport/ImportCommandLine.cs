@@ -134,6 +134,7 @@ namespace WorkItemImport
                             ("QUANTUMTOUCH-4", 23),
                             ("QUANTUMTOUCH-5", 3),
                             ("QUANTUMTOUCH-7", 3),
+                            ("QUANTUMTOUCH-2", 12),
                         };
 
                         foreach (var item in breakItems)
