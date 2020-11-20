@@ -19,15 +19,15 @@
     "link": [
       {
         "source": "Epic",
-        "target": "System.LinkTypes.Hierarchy-Forward"
+        "target": "System.LinkTypes.Hierarchy-Reverse"
       },
       {
         "source": "Parent",
-        "target": "System.LinkTypes.Hierarchy-Forward"
+        "target": "System.LinkTypes.Hierarchy-Reverse"
       },
       {
         "source": "Child",
-        "target": "System.LinkTypes.Hierarchy-Reverse"
+        "target": "System.LinkTypes.Hierarchy-Forward"
       },
       {
         "source": "Relates",
