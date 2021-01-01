@@ -128,15 +128,14 @@ namespace WorkItemImport
                         Logger.Log(LogLevel.Info, $"Processing {importedItems + 1}/{revisionCount} - wi '{(wi.Id > 0 ? wi.Id.ToString() : "Initial revision")}', jira '{executionItem.OriginId}, rev {executionItem.Revision.Index}'.");
 
 
-
+                        // Conditional break for debugging
                         var breakItems = new (string, int)[]
                         {
-                            ("QUANTUMTOUCH-4", 23),
-                            ("QUANTUMTOUCH-5", 3),
-                            ("QUANTUMTOUCH-7", 3),
-                            ("QUANTUMTOUCH-2", 12),
+                            //("QUANTUMTOUCH-4", 23),
+                            //("QUANTUMTOUCH-5", 3),
+                            //("QUANTUMTOUCH-7", 3),
+                            ("QUANTUMTOUCH-56-DON'T STOP", 2),
                         };
-
                         foreach (var item in breakItems)
                         {
                             if (item.Item1.Equals(executionItem.OriginId, StringComparison.OrdinalIgnoreCase) &&

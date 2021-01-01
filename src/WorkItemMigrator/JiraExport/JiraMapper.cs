@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -130,6 +131,21 @@ namespace JiraExport
         {
             Logger.Log(LogLevel.Debug, $"Mapping revision {r.Index}.");
 
+            // Conditional break for debugging
+            var breakItems = new (string, int)[]
+            {
+                            ("QUANTUMTOUCH-55-DON'T STOP", 0),
+            };
+            foreach (var item in breakItems)
+            {
+                if (item.Item1.Equals(r.OriginId, StringComparison.OrdinalIgnoreCase) &&
+                    item.Item2 == r.Index)
+                {
+                    Debugger.Break();
+                    break;
+                }
+            }
+
             List<WiAttachment> attachments = MapAttachments(r);
             List<WiField> fields = MapFields(r);
             List<WiLink> links = MapLinks(r);
@@ -213,7 +229,8 @@ namespace JiraExport
             AddRemoveSingleLink(r, links, _jiraProvider.Settings.EpicLinkField, "Epic");
 
             // map parent
-            AddRemoveSingleLink(r, links, "parent", "Parent");
+//            AddRemoveSingleLink(r, links, "parent", "Parent");
+            AddRemoveSingleLink(r, links, "parent", "SubTask");
 
             // map epic child
             MapEpicChildLink(r, links, "epic child", "Child");

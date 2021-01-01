@@ -441,8 +441,11 @@ namespace WorkItemImport
                             break;
 
                         case var s when s.Equals(WiFieldReference.ActivatedDate, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null ||
-                             s.Equals(WiFieldReference.ActivatedBy, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null ||
-                            s.Equals(WiFieldReference.ClosedDate, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null ||
+                            s.Equals(WiFieldReference.ActivatedBy, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null :
+
+                            SetFieldValue(wi, fieldRef, fieldValue);
+                            break;
+                        case var s when s.Equals(WiFieldReference.ClosedDate, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null ||
                             s.Equals(WiFieldReference.ClosedBy, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null ||
                             s.Equals(WiFieldReference.Tags, StringComparison.InvariantCultureIgnoreCase) && fieldValue == null:
 
@@ -470,6 +473,11 @@ namespace WorkItemImport
         {
             try
             {
+                if (!wi.Fields.Contains(fieldRef))
+                {
+                    Logger.Log(LogLevel.Debug, $"Work item [{wi.Id}] doesn't contain Field [{fieldRef}]");
+                    return;
+                }
                 var field = wi.Fields[fieldRef];
 
                 field.Value = fieldValue;
@@ -610,15 +618,115 @@ namespace WorkItemImport
             return success;
         }
 
+
+
+        private void updateLinkType (ref WiLink link, ref WorkItem wi)
+        {
+            // Force the proper hierarchy for TFS
+            var relatedWi = GetWorkItem(link.TargetWiId);
+
+            switch (wi.Type.Name)
+            {
+                case "Epic":
+                    switch (relatedWi.Type.Name)
+                    {
+                        case "Epic":
+                            link.WiType = "System.LinkTypes.Related";
+                            break;
+                        case "Feature":
+                            link.WiType = "System.LinkTypes.Hierarchy-Forward";
+                            break;
+                        case "Product Backlog Item":
+                            link.WiType = "System.LinkTypes.Hierarchy-Forward";
+                            break;
+                        case "Task":
+                            link.WiType = "System.LinkTypes.Hierarchy-Forward";
+                            break;
+                    }
+                    break;
+
+                case "Feature":
+                    switch (relatedWi.Type.Name)
+                    {
+                        case "Epic":
+                            link.WiType = "System.LinkTypes.Hierarchy-Reverse";
+                            break;
+                        case "Feature":
+                            link.WiType = "System.LinkTypes.Related";
+                            break;
+                        case "Product Backlog Item":
+                            link.WiType = "System.LinkTypes.Hierarchy-Forward";
+                            break;
+                        case "Task":
+                            link.WiType = "System.LinkTypes.Hierarchy-Forward";
+                            break;
+                    }
+                    break;
+
+                case "Product Backlog Item":
+                    switch (relatedWi.Type.Name)
+                    {
+                        case "Epic":
+                            link.WiType = "System.LinkTypes.Hierarchy-Reverse";
+                            break;
+                        case "Feature":
+                            link.WiType = "System.LinkTypes.Hierarchy-Reverse";
+                            break;
+                        case "Product Backlog Item":
+                            link.WiType = "System.LinkTypes.Related";
+                            break;
+                        case "Task":
+                            link.WiType = "System.LinkTypes.Hierarchy-Forward";
+                            break;
+                    }
+                    break;
+
+                case "Task":
+                    switch (relatedWi.Type.Name)
+                    {
+                        case "Epic":
+                            link.WiType = "System.LinkTypes.Hierarchy-Reverse";
+                            break;
+                        case "Feature":
+                            link.WiType = "System.LinkTypes.Hierarchy-Reverse";
+                            break;
+                        case "Product Backlog Item":
+                            link.WiType = "System.LinkTypes.Hierarchy-Reverse";
+                            break;
+                        case "Task":
+                            link.WiType = "System.LinkTypes.Related";
+                            break;
+                    }
+                    break;
+            }
+
+
+        }
+
         private bool AddLink(WiLink link, WorkItem wi)
         {
+            updateLinkType(ref link, ref wi);
+
             var comment = string.Empty;
+            WorkItem childWorkItem = null;
+
+
+            // Check for duplicate parent.
             if (link.WiType.Equals("System.LinkTypes.Hierarchy-Forward", StringComparison.OrdinalIgnoreCase))
             {
-                // Need to verify there aren't already other parents
-                var relatedWorkItem = GetWorkItem(link.TargetWiId);
-//                var relatedLinkCount = relatedWorkItem.RelatedLinkCount;
-                foreach (var item in relatedWorkItem.WorkItemLinks)
+                // A Hierarchy-Forward has the parent as the source and the child as the target.
+                childWorkItem = GetWorkItem(link.TargetWiId);
+            }
+            else if (link.WiType.Equals("System.LinkTypes.Hierarchy-Reverse", StringComparison.OrdinalIgnoreCase) && (link.SourceWiId > 0))
+            {
+                // A Hierarchy-Forward has the child as the source and the parent as the target.
+                childWorkItem = GetWorkItem(link.SourceWiId);
+            }
+
+            if (childWorkItem != null)
+            {
+                // This is a parent/child link, check for duplicates.
+                foreach (var item in childWorkItem.WorkItemLinks)
                 {
                     var relatedLink = item as WorkItemLink;
                     if (relatedLink == null)
@@ -632,7 +740,7 @@ namespace WorkItemImport
                     {
                         // There's already another parent for this one, change this to related with a comment
                         link.WiType = "System.LinkTypes.Related";
-                        comment = $"Link changed from parent/child as {relatedLink.SourceId} already had parent.";
+                        comment = $"Link changed from parent/child as {relatedLink.SourceId} already had parent of {relatedLink.TargetId}.";
                         Logger.Log(LogLevel.Debug, comment);
                     }
                 }
@@ -650,6 +758,7 @@ namespace WorkItemImport
                     if (!IsDuplicateWorkItemLink(wi.Links, relatedLink))
                     {
                         wi.Links.Add(relatedLink);
+                        Logger.Log(LogLevel.Debug, $"Added Link of type [{link.WiType}] with source [{link.SourceOriginId}] and target [{link.TargetOriginId}].");
                         return true;
                     }
                     return false;
@@ -733,7 +842,14 @@ namespace WorkItemImport
 
         private bool RemoveLink(WiLink link, WorkItem wi)
         {
+            updateLinkType(ref link, ref wi);
+
             var linkToRemove = wi.Links.OfType<RelatedLink>().SingleOrDefault(rl => rl.LinkTypeEnd.ImmutableName == link.WiType && rl.RelatedWorkItemId == link.TargetWiId);
+            if (linkToRemove == null)
+            {
+                // Duplicate parent may have been converted to Related.
+                linkToRemove = wi.Links.OfType<RelatedLink>().SingleOrDefault(rl => rl.LinkTypeEnd.ImmutableName == "System.LinkTypes.Related" && rl.RelatedWorkItemId == link.TargetWiId);
+            }
             if (linkToRemove == null)
             {
                 Logger.Log(LogLevel.Warning, $"{link.ToString()} - cannot identify link to remove for '{wi.Id}'.");
@@ -753,7 +869,6 @@ namespace WorkItemImport
             }
             try
             {
-                FixupMultipleParentLinks(newWorkItem);
                 newWorkItem.Save(SaveFlags.MergeAll);
             }
             catch (FileAttachmentException faex)
@@ -788,36 +903,6 @@ namespace WorkItemImport
             }
 
             return result;
-        }
-        private void FixupMultipleParentLinks(WorkItem newWorkItem)
-        {
-            //var links = newWorkItem.Links.OfType<RelatedLink>().ToList();
-            //int parents = 0;
-            //foreach (var link in links)
-            //{
-            //    if (link.LinkTypeEnd.Name.Equals("Parent", StringComparison.OrdinalIgnoreCase))
-            //    {
-            //        var thisWorkItem = GetWorkItem(newWorkItem.Id);
-            //        if (thisWorkItem != null)
-            //        {
-            //            foreach (RelatedLink existingLink in thisWorkItem.Links)
-            //            {
-            //                if (existingLink.LinkTypeEnd.ImmutableName.Equals("System.LinkTypes.Hierarchy-Reverse",
-            //                    StringComparison.CurrentCultureIgnoreCase))
-            //                {
-            //                    parents++;
-            //                }
-            //            }
-            //        }
-
-            //        if (parents > 0)
-            //        {
-            //            // TFS only allows a single parent, change the rest to related
-            //            Logger.Log(LogLevel.Warning, $"Work Item [{newWorkItem.Id}] had more than 1 parents, [{link.LinkTypeEnd.OppositeEnd.Id}] changed to related.");
-            //        }
-            //        parents++;
-            //    }
-            //}
         }
 
         private void EnsureAuthorFields(WiRevision rev)

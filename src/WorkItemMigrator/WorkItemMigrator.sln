@@ -15,6 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migration.Common.Log", "Mig
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MTS Import Config stuff", "MTS Import Config stuff", "{6C530A73-3213-4FD4-ADA5-81B50719F180}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\JiraExport\config-DJSscrum.jsonConfig = ..\..\..\..\JiraExport\config-DJSscrum.jsonConfig
 		..\..\..\..\JiraExport\config-MTSscrum.jsonConfig = ..\..\..\..\JiraExport\config-MTSscrum.jsonConfig
 		..\..\..\..\JiraExport\Users.txt = ..\..\..\..\JiraExport\Users.txt
 	EndProjectSection

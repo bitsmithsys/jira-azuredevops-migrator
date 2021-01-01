@@ -11,23 +11,27 @@
   "log-level": "Debug",
   "attachment-folder": "Attachments",
   "user-mapping-file": "users.txt",
-  "base-area-path": "MTS/TestSuite/QuantumTouch2",
-  "base-iteration-path": "MTS/TestSuite/QuantumTouch2",
+  "base-area-path": "TestSuite/QuantumTouch",
+  "base-iteration-path": "TestSuite/QuantumTouch",
   "ignore-failed-links": true,
   "process-template": "MTS Custom Scrum",
   "link-map": {
     "link": [
       {
         "source": "Epic",
-        "target": "System.LinkTypes.Hierarchy-Reverse"
+        "target": "System.LinkTypes.Hierarchy-Forward"
       },
       {
         "source": "Parent",
-        "target": "System.LinkTypes.Hierarchy-Reverse"
+        "target": "System.LinkTypes.Hierarchy-Forward"
       },
       {
         "source": "Child",
-        "target": "System.LinkTypes.Hierarchy-Forward"
+        "target": "System.LinkTypes.Hierarchy-Reverse"
+      },
+      {
+        "source": "SubTask",
+        "target": "System.LinkTypes.Hierarchy-Reverse"
       },
       {
         "source": "Relates",
@@ -319,10 +323,6 @@
               "target": "Approved"
             },
             {
-              "source": "Ready",
-              "target": "Approved"
-            },
-            {
               "source": "Assigned",
               "target": "Approved"
             },
@@ -384,7 +384,19 @@
               "target": "New"
             },
             {
+              "source": "Ready for Ticketing",
+              "target": "New"
+            },
+            {
               "source": "Deferred",
+              "target": "New"
+            },
+            {
+              "source": "Unconfirmed",
+              "target": "New"
+            },
+            {
+              "source": "Ticketed",
               "target": "New"
             },
             {
@@ -432,6 +444,10 @@
               "target": "In Progress"
             },
             {
+              "source": "Fixed Locally",
+              "target": "In Progress"
+            },
+            {
               "source": "Blocked",
               "target": "In Progress"
             },
@@ -450,6 +466,14 @@
             {
               "source": "Assigned",
               "target": "In Progress"
+            },
+            {
+              "source": "Pending Close",
+              "target": "In Progress"
+            },
+            {
+              "source": "Ready",
+              "target": "Approved"
             },
             {
               "source": "In Progress",
