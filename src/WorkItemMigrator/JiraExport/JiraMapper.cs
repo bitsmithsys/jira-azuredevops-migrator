@@ -646,6 +646,8 @@ namespace JiraExport
 
             var iterationPath = iterationPaths.Last();
 
+            iterationPath.Replace('/', '.').Replace('\\', '.');
+
             return iterationPath;
         }
 
